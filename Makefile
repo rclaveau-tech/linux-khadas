@@ -433,6 +433,14 @@ ifneq ($(SRCARCH),$(SUBARCH))
 cross_compiling := 1
 endif
 
+# ifdef CONFIG_AMLOGIC_DRIVER
+# config cannot be used here to mark AMLOGIC modifications
+# If these three variables are not set externally, set their default values
+export COMMON_DRIVERS_DIR ?= common_drivers
+dtstree ?= $(COMMON_DRIVERS_DIR)/arch/$(SRCARCH)/boot/dts/amlogic
+export DTC_INCLUDE ?= $(srctree)/$(COMMON_DRIVERS_DIR)/include
+# endif
+
 KCONFIG_CONFIG	?= .config
 export KCONFIG_CONFIG
 
@@ -790,10 +798,20 @@ ifdef need-config
 include $(objtree)/include/config/auto.conf
 endif
 
+ifdef CONFIG_AMLOGIC_DRIVER
+include $(srctree)/$(COMMON_DRIVERS_DIR)/header_include.mk
+KBUILD_CFLAGS += -Werror
+endif
+
 ifeq ($(KBUILD_EXTMOD),)
 # Objects we will link into vmlinux / subdirs we need to visit
 core-y		:=
 drivers-y	:=
+ifdef CONFIG_AMLOGIC_IN_KERNEL_MODULES
+drivers-y	+= $(COMMON_DRIVERS_DIR)/drivers/ $(COMMON_DRIVERS_DIR)/sound/
+drivers-y       += $(COMMON_DRIVERS_DIR)/samples/
+KBUILD_CFLAGS += -Wno-misleading-indentation -Wno-error=address -Wno-enum-int-mismatch -Wno-frame-larger-than -Wno-stringop-overread
+endif
 libs-y		:= lib/
 endif # KBUILD_EXTMOD
 
@@ -1430,6 +1448,9 @@ ifdef HEADER_ARCH
 else
 	$(Q)$(MAKE) $(hdr-inst)=include/uapi
 	$(Q)$(MAKE) $(hdr-inst)=arch/$(SRCARCH)/include/uapi
+ifdef CONFIG_AMLOGIC_DRIVER
+	$(Q)$(MAKE) $(hdr-inst)=$(hdr-prefix)$(COMMON_DRIVERS_DIR)/include/uapi
+endif
 endif
 
 ifdef CONFIG_HEADERS_INSTALL
@@ -2232,8 +2253,16 @@ endif # config-build
 endif # mixed-build
 endif # need-sub-make
 
+ifdef CONFIG_AMLOGIC_DRIVER
 PHONY += FORCE
 FORCE:
+	$(Q)-cp $(srctree)/scripts/amlogic/commit-msg $(srctree)/.git/hooks/
+	$(Q)-cp $(srctree)/scripts/amlogic/commit-msg $(srctree)/$(COMMON_DRIVERS_DIR)/.git/hooks/
+	$(Q)-chmod +x $(srctree)/.git/hooks/commit-msg $(srctree)/$(COMMON_DRIVERS_DIR)/.git/hooks/commit-msg
+else
+PHONY += FORCE
+FORCE:
+endif
 
 # Declare the contents of the PHONY variable as phony.  We keep that
 # information in a variable so we can use it in if_changed and friends.
