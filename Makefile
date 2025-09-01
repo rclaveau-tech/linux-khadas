@@ -1547,7 +1547,7 @@ kselftest-merge:
 # Devicetree files
 
 ifneq ($(wildcard $(srctree)/arch/$(SRCARCH)/boot/dts/),)
-dtstree := arch/$(SRCARCH)/boot/dts
+dtstree ?= arch/$(SRCARCH)/boot/dts
 endif
 
 dtbindingtree := Documentation/devicetree/bindings
