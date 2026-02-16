@@ -1,0 +1,66 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright (c) 2022 Wesion, Inc. All rights reserved.
+ */
+
+/dts-v1/;
+
+#include "amlogic-t7.dtsi"
+
+/ {
+	model = "Khadas vim4";
+	compatible = "khadas,vim4", "amlogic,a311d2", "amlogic,t7";
+
+	aliases {
+		serial0 = &uart_a;
+	};
+
+	chosen {
+		stdout-path = "serial0:921600n8";
+	};
+
+	memory@0 {
+		device_type = "memory";
+		reg = <0x0 0x0 0x0 0xE0000000
+			   0x00000001 0x0 0x0 0xE0000000
+			   0x00000002 0x0 0x0 0x40000000>;
+	};
+
+	reserved-memory {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		secmon_reserved:linux,secmon {
+			compatible = "shared-dma-pool";
+			/*reusable;*/
+			no-map;
+			size = <0x0 0x3400000>;
+			alignment = <0x0 0x400000>;
+			alloc-ranges = <0x0 0x05000000 0x0 0x3400000>;
+		};
+	};
+
+	secmon {
+		compatible = "amlogic, secmon";
+		memory-region = <&secmon_reserved>;
+		in_base_func = <0x82000020>;
+		out_base_func = <0x82000021>;
+		inout_size_func = <0x8200002a>;
+		reserve_mem_size = <0x03300000>;
+	};
+
+	xtal: xtal-clk {
+		compatible = "fixed-clock";
+		clock-frequency = <24000000>;
+		clock-output-names = "xtal";
+		#clock-cells = <0>;
+	};
+
+};
+
+&uart_a {
+	status = "okay";
+	clocks = <&xtal>, <&xtal>, <&xtal>;
+	clock-names = "xtal", "pclk", "baud";
+};
