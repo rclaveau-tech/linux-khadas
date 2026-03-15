@@ -156,6 +156,8 @@
 		clocks = <&wifi32k>;
 		clock-names = "lpo";
 		firmware-name = "brcm/BCM4362A2.hcd";
+		vbat-supply = <&vddao_3v3>;
+		vddio-supply = <&vddao_1v8>;
 	};
 };
 
