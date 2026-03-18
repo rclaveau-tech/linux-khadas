@@ -612,13 +612,11 @@
 			};
 
 			pwm_ab: pwm@58000 {
-				compatible = "amlogic,t7-pwm", "amlogic,meson-g12-pwm-v2";
-				reg = <0x0 0x58000 0x0 0x20>;
-				clocks = <&xtal>,
-					 <&hdmi CLKID_HDMI_PLL>,
-					 <&scmi_clk CLKID_FCLK_DIV4>,
-					 <&scmi_clk CLKID_FCLK_DIV3>;
-				#pwm-cells = <2>;
+				compatible = "amlogic,t7-pwm", "amlogic,meson-s4-pwm";
+				reg = <0x0 0x58000 0x0 0x24>;
+				clocks = <&clkc_periphs CLKID_PWM_A>,
+					 <&clkc_periphs CLKID_PWM_B>;
+				#pwm-cells = <3>;
 				status = "disabled";
 			};
 
@@ -631,11 +629,10 @@
 					 <&clkc_periphs CLKID_SD_EMMC_A>,
 					 <&scmi_clk CLKID_FCLK_DIV2>;
 				clock-names = "core", "clkin0", "clkin1";
-				resets = <&reset RESET_SD_EMMC_A>;
 				assigned-clocks = <&clkc_periphs CLKID_SD_EMMC_A_SEL>;
 				assigned-clock-parents = <&xtal>;
-				//no-mmc;
-				//no-sd;
+				no-mmc;
+				no-sd;
 			};
 
 			sd_emmc_b: mmc@8a000 {
