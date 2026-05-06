@@ -236,6 +236,18 @@
 		fan-supply = <&vcc5v>;
 		#cooling-cells = <2>;
 	};
+
+	accelerometer@e {
+		compatible = "kionix,kxtj31057";
+		reg = <0xe>;
+		vdd-supply = <&vddao_3v3>;
+		vddio-supply = <&vddao_3v3>;
+		interrupt-parent = <&gpio_intc>;
+		interrupts = <132 IRQ_TYPE_EDGE_RISING>;
+		mount-matrix = "1", "0",  "0",
+			       "0", "1",  "0",
+			       "0", "0", "-1";
+	};
 };
 
 &nna_thermal {
