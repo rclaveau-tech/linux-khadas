@@ -165,6 +165,9 @@
 #define KX023_REG_INC4_WUFI1		BIT(1)
 #define KX023_REG_INC4_TPI1		BIT(0)
 
+#define KXTJ31057_REG_NA_COUNTER	0x2A
+#define KXTJ31057_REG_WAKE_THRES_L	0x6B
+
 #define KXCJK1013_DEFAULT_WAKE_THRES	1
 
 /* Refer to section 4 of the specification */
@@ -236,6 +239,23 @@ static const struct kx_odr_start_up_time kx0231025_odr_start_up_times[] = {
 	{ }
 };
 
+/* KXTJ3-1057 */
+static const struct kx_odr_start_up_time kxtj31057_odr_start_up_times[] = {
+	{ 0x08, 1281000 },
+	{ 0x09, 641000 },
+	{ 0x0A, 321000 },
+	{ 0x0B, 161000 },
+	{ 0x00, 81000 },
+	{ 0x01, 41000 },
+	{ 0x02, 21000 },
+	{ 0x03, 11000 },
+	{ 0x04, 6000 },
+	{ 0x05, 4000 },
+	{ 0x06, 3000 },
+	{ 0x07, 2000 },
+	{ }
+};
+
 enum kx_acpi_type {
 	ACPI_GENERIC,
 	ACPI_SMO8500,
@@ -252,6 +272,8 @@ struct kx_chipset_regs {
 	u8 data_ctrl;
 	u8 wake_timer;
 	u8 wake_thres;
+	u8 wake_thres_l;
+	bool wake_thres_16_bits;
 };
 
 static const struct kx_chipset_regs kxcjk1013_regs = {
@@ -290,6 +312,20 @@ static const struct kx_chipset_regs kx0231025_regs = {
 	.data_ctrl	= KX023_REG_ODCNTL,
 	.wake_timer	= KX023_REG_WUFC,
 	.wake_thres	= KX023_REG_ATH,
+};
+
+static const struct kx_chipset_regs kxtj31057_regs = {
+	.int_src1		= KXCJK1013_REG_INT_SRC1,
+	.int_src2		= KXCJK1013_REG_INT_SRC2,
+	.int_rel		= KXCJK1013_REG_INT_REL,
+	.ctrl1			= KXCJK1013_REG_CTRL1,
+	.wuf_ctrl		= KXCJK1013_REG_CTRL2,
+	.int_ctrl1		= KXCJK1013_REG_INT_CTRL1,
+	.data_ctrl		= KXCJK1013_REG_DATA_CTRL,
+	.wake_timer		= KXCJK1013_REG_WAKE_TIMER,
+	.wake_thres		= KXCJK1013_REG_WAKE_THRES,
+	.wake_thres_l		= KXTJ31057_REG_WAKE_THRES_L,
+	.wake_thres_16_bits	= true,
 };
 
 struct kx_chipset_info {
@@ -339,6 +375,11 @@ static const struct kx_chipset_info kxtf9_info = {
 static const struct kx_chipset_info kx0231025_info = {
 	.regs = &kx0231025_regs,
 	.times = pm_ptr(kx0231025_odr_start_up_times),
+};
+
+static const struct kx_chipset_info kxtj31057_info = {
+	.regs = &kxtj31057_regs,
+	.times = pm_ptr(kxtj31057_odr_start_up_times),
 };
 
 enum kxcjk1013_axis {
@@ -648,6 +689,26 @@ static int kxcjk1013_set_power_state(struct kxcjk1013_data *data, bool on)
 	return 0;
 }
 
+static int kxcjk1013_write_wake_thres(struct kxcjk1013_data *data,
+				      const struct kx_chipset_regs *regs)
+{
+	const int val = data->wake_thres;
+
+	if (regs->wake_thres_16_bits) {
+		int ret = i2c_smbus_write_byte_data(data->client,
+						    regs->wake_thres,
+						    (val >> 4) & 0xFF);
+		if (ret < 0)
+			return ret;
+		return i2c_smbus_write_byte_data(data->client,
+						 regs->wake_thres_l,
+						 (val & 0x0F) << 4);
+	}
+
+	return i2c_smbus_write_byte_data(data->client, regs->wake_thres,
+					 data->wake_thres);
+}
+
 static int kxcjk1013_chip_update_thresholds(struct kxcjk1013_data *data)
 {
 	const struct kx_chipset_regs *regs = data->info->regs;
@@ -660,7 +721,7 @@ static int kxcjk1013_chip_update_thresholds(struct kxcjk1013_data *data)
 		return ret;
 	}
 
-	ret = i2c_smbus_write_byte_data(data->client, regs->wake_thres, data->wake_thres);
+	ret = kxcjk1013_write_wake_thres(data, regs);
 	if (ret < 0) {
 		dev_err(&data->client->dev, "Error writing reg_wake_thres\n");
 		return ret;
@@ -830,10 +891,10 @@ static int kxcjk1013_get_odr(struct kxcjk1013_data *data, int *val, int *val2)
 		return kxcjk1013_convert_odr_value(kxtf9_samp_freq_table,
 						   ARRAY_SIZE(kxtf9_samp_freq_table),
 						   data->odr_bits, val, val2);
-	else
-		return kxcjk1013_convert_odr_value(samp_freq_table,
-						   ARRAY_SIZE(samp_freq_table),
-						   data->odr_bits, val, val2);
+
+	return kxcjk1013_convert_odr_value(samp_freq_table,
+					   ARRAY_SIZE(samp_freq_table),
+					   data->odr_bits, val, val2);
 }
 
 static int kxcjk1013_get_acc_reg(struct kxcjk1013_data *data, int axis)
@@ -1376,8 +1437,8 @@ static irqreturn_t kxcjk1013_data_rdy_trig_poll(int irq, void *private)
 
 	if (data->ev_enable_state)
 		return IRQ_WAKE_THREAD;
-	else
-		return IRQ_HANDLED;
+
+	return IRQ_HANDLED;
 }
 
 static int kxcjk1013_probe(struct i2c_client *client)
@@ -1635,6 +1696,7 @@ static const struct i2c_device_id kxcjk1013_id[] = {
 	{ "kxtj21009",  (kernel_ulong_t)&kxtj21009_info },
 	{ "kxtf9", (kernel_ulong_t)&kxtf9_info },
 	{ "kx023-1025", (kernel_ulong_t)&kx0231025_info },
+	{ "kxtj31057", (kernel_ulong_t)&kxtj31057_info },
 	{ }
 };
 MODULE_DEVICE_TABLE(i2c, kxcjk1013_id);
@@ -1645,6 +1707,7 @@ static const struct of_device_id kxcjk1013_of_match[] = {
 	{ .compatible = "kionix,kxtj21009", &kxtj21009_info },
 	{ .compatible = "kionix,kxtf9", &kxtf9_info },
 	{ .compatible = "kionix,kx023-1025", &kx0231025_info },
+	{ .compatible = "kionix,kxtj31057", &kxtj31057_info },
 	{ }
 };
 MODULE_DEVICE_TABLE(of, kxcjk1013_of_match);
