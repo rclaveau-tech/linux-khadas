@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: GPL-2.0-only
+
+config DRM_ACCEL_ADLA
+	tristate "Adla (support for Amlogic NPUs)"
+	depends on DRM_ACCEL
+	depends on ARCH_MESON || COMPILE_TEST
+	select DRM_SCHED
+	select DRM_GEM_SHMEM_HELPER
+	help
+	  Choose this option if you have a Amlogic SoC that contains a
+	  compatible Neural Processing Unit (NPU), such as the A311D2. Called by
+	  Amlogic as ADLA, it accelerates inference of neural networks.
+
+	  If unsure, say N.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called adla.
