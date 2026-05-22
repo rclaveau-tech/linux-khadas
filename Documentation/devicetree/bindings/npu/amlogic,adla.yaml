@@ -1,0 +1,54 @@
+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/npu/amlogic,adla.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Amlogic ADLA Neural Processing Unit
+
+maintainers:
+  - Ronald Claveau <linux-kernel-dev@aliel.fr>
+
+description: >
+  Amlogic IP for accelerating inference of neural networks.
+
+properties:
+  compatible:
+    enum:
+      - amlogic,t7-adla
+
+  reg:
+    maxItems: 1
+
+  clocks:
+    maxItems: 4
+
+  clock-names:
+    items:
+      - const: adla_core_clk
+      - const: adla_clk
+      - const: adla_clk_parent0
+      - const: adla_clk_parent1
+
+  interrupts:
+    maxItems: 1
+
+  vnpu-supply: true
+
+  power-domains:
+    maxItems: 5
+
+  sram-supply: true
+
+required:
+  - compatible
+  - reg
+  - clocks
+  - clock-names
+  - interrupts
+  - power-domains
+  - vnpu-supply
+
+additionalProperties: false
+
+...
