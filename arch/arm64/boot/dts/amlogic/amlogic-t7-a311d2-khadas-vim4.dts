@@ -152,6 +152,37 @@
 			  3300000 0>;
 	};
 
+	vdd_npu: regulator-pwmao-f {
+		compatible = "pwm-regulator";
+		pwms = <&pwm_ao_ef 1 840 0>;
+		regulator-name = "VDD_NPU";
+		regulator-min-microvolt = <690000>;
+		regulator-max-microvolt = <890000>;
+		regulator-always-on;
+		voltage-table =
+			<890000 0>,
+			<880000 5>,
+			<870000 10>,
+			<860000 15>,
+			<850000 20>,
+			<840000 25>,
+			<830000 30>,
+			<820000 35>,
+			<810000 40>,
+			<800000 45>,
+			<790000 50>,
+			<780000 55>,
+			<770000 60>,
+			<760000 65>,
+			<750000 70>,
+			<740000 75>,
+			<730000 80>,
+			<720000 85>,
+			<710000 90>,
+			<700000 95>,
+			<690000 100>;
+	};
+
 	wifi32k: wifi32k {
 		compatible = "pwm-clock";
 		#clock-cells = <0>;
@@ -165,6 +196,16 @@
 		clock-output-names = "xtal";
 		#clock-cells = <0>;
 	};
+};
+
+&adla {
+	status = "okay";
+	power-domains = <&pwrc PWRC_T7_NNA_TOP_ID>,
+			<&pwrc PWRC_T7_NNA_CORE0_ID>,
+			<&pwrc PWRC_T7_NNA_CORE1_ID>,
+			<&pwrc PWRC_T7_NNA_CORE2_ID>,
+			<&pwrc PWRC_T7_NNA_CORE3_ID>;
+	vnpu-supply = <&vdd_npu>;
 };
 
 &a53_thermal {
@@ -274,6 +315,12 @@
 &pwm_ao_cd {
 	status = "okay";
 	pinctrl-0 = <&pwm_ao_c_d_pins>;
+	pinctrl-names = "default";
+};
+
+&pwm_ao_ef {
+	status = "okay";
+	pinctrl-0 = <&pwm_ao_e_pins>, <&pwm_ao_f_pins>;
 	pinctrl-names = "default";
 };
 
