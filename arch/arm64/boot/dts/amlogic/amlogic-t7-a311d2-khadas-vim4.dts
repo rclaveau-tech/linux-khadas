@@ -200,11 +200,11 @@
 
 &adla {
 	status = "okay";
-	power-domains = <&pwrc PWRC_T7_NNA_TOP_ID>,
+	power-domains = <&pwrc PWRC_T7_NNA_TOP_ID>/*,
 			<&pwrc PWRC_T7_NNA_CORE0_ID>,
 			<&pwrc PWRC_T7_NNA_CORE1_ID>,
 			<&pwrc PWRC_T7_NNA_CORE2_ID>,
-			<&pwrc PWRC_T7_NNA_CORE3_ID>;
+			<&pwrc PWRC_T7_NNA_CORE3_ID>*/;
 	vnpu-supply = <&vdd_npu>;
 };
 

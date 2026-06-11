@@ -843,30 +843,60 @@
 				amlogic,secure-monitor = <&sm 5>;
 			};
 
-			adla: adla@371000 {
-				compatible = "amlogic,t7-adla";
+			/*adla: adla@371000 {
+				compatible = "amlogic,adla";
 				reg = <0x0 0x371000 0x0 0x200>;
 				interrupts = <GIC_SPI 185 IRQ_TYPE_LEVEL_HIGH>;
 				clocks = <&clkc_periphs CLKID_ANAKIN>,
-				         <&clkc_periphs CLKID_ANAKIN_01_SEL>,
-				         <&clkc_periphs CLKID_ANAKIN_0>,
-				         <&clkc_periphs CLKID_ANAKIN_1>;
+					 <&clkc_periphs CLKID_ANAKIN_01_SEL>,
+					 <&clkc_periphs CLKID_ANAKIN_0>,
+					 <&clkc_periphs CLKID_ANAKIN_1>;
 				clock-names = "adla_core_clk",
-				              "adla_clk",
-				              "adla_clk_parent0",
-				              "adla_clk_parent1";
-				assigned-clocks =<&clkc_periphs CLKID_ANAKIN_0_SEL>,
-				                 <&clkc_periphs CLKID_ANAKIN_01_SEL>,
-				                 <&clkc_periphs CLKID_ANAKIN>;
+					      "adla_clk",
+					      "adla_clk_parent0",
+					      "adla_clk_parent1";
+				assigned-clocks = <&clkc_periphs CLKID_ANAKIN_0_SEL>,
+						  <&clkc_periphs CLKID_ANAKIN_01_SEL>,
+						  <&clkc_periphs CLKID_ANAKIN>;
 				assigned-clock-parents = <&scmi_clk CLKID_FCLK_DIV2P5>,
-				                         <&clkc_periphs CLKID_ANAKIN_0>,
-				                         <0>;
+							 <&clkc_periphs CLKID_ANAKIN_0>,
+							 <0>;
 				assigned-clock-rates = <0>,
-				                       <0>,
-				                       <800000000>;
+						       <0>,
+						       <800000000>;
 				status = "disabled";
-			};
+			};*/
 		};
+
+		adla: adla@0xfe371000 {
+			compatible = "amlogic,adla";
+			dev_name = "adla";
+			reg = <0x0 0xfe371000 0x0 0x200
+			       0x0 0xf7048000 0x0 0x138000>;
+			reg-names = "adla_reg\0adla_sram";
+			interrupt-names = "adla";
+			interrupts = <0 185 4>;
+			clocks = <&clkc_periphs CLKID_ANAKIN>,
+				 <&clkc_periphs CLKID_ANAKIN_01_SEL>,
+				 <&clkc_periphs CLKID_ANAKIN_0>,
+				 <&clkc_periphs CLKID_ANAKIN_1>;
+			clock-names = "adla_core_clk",
+				      "adla_clk",
+				      "adla_clk_parent0",
+				      "adla_clk_parent1";
+			assigned-clocks = <&clkc_periphs CLKID_ANAKIN_0_SEL>,
+					  <&clkc_periphs CLKID_ANAKIN_01_SEL>,
+					  <&clkc_periphs CLKID_ANAKIN>;
+			assigned-clock-parents = <&scmi_clk CLKID_FCLK_DIV2P5>,
+						 <&clkc_periphs CLKID_ANAKIN_0>,
+						 <0>;
+			assigned-clock-rates = <0>,
+					       <0>,
+					       <800000000>;
+			nn_hw_version = "r2p0";
+			smmu;
+			status = "disabled";
+			};
 	};
 
 	thermal-zones {
