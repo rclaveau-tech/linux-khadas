@@ -132,7 +132,7 @@
 				compatible = "amlogic,meson-a1-periphs-pinctrl";
 				#address-cells = <2>;
 				#size-cells = <2>;
-				ranges;
+				ranges = <0x0 0x400 0x0 0x400 0x0 0x198>;
 
 				gpio: bank@400 {
 					reg = <0x0 0x0400 0x0 0x003c>,
