@@ -272,7 +272,7 @@
 					compatible = "amlogic,meson-g12a-periphs-pinctrl";
 					#address-cells = <2>;
 					#size-cells = <2>;
-					ranges;
+					ranges = <0x0 0x40 0x0 0x40 0x0 0x31c>;
 
 					gpio: bank@40 {
 						reg = <0x0 0x40  0x0 0x4c>,
@@ -1769,7 +1769,7 @@
 				compatible = "amlogic,meson-g12a-aobus-pinctrl";
 				#address-cells = <2>;
 				#size-cells = <2>;
-				ranges;
+				ranges = <0x0 0x14 0x0 0x14 0x0 0x24>;
 
 				gpio_ao: bank@14 {
 					reg = <0x0 0x14 0x0 0x8>,
@@ -2247,8 +2247,6 @@
 				clock-names = "pclk", "bit", "px";
 				phys = <&mipi_dphy>;
 				phy-names = "dphy";
-				#address-cells = <1>;
-				#size-cells = <0>;
 				status = "disabled";
 
 				assigned-clocks = <&clkc CLKID_MIPI_DSI_PXCLK_SEL>,
