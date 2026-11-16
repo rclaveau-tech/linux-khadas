@@ -105,3 +105,14 @@ config PHY_MESON_AXG_MIPI_DPHY
 	  Enable this to support the Meson MIPI DPHY found in Meson AXG
 	  SoCs.
 	  If unsure, say N.
+
+config PHY_MESON_HDMI_TX
+	tristate "Meson HDMI TX PHY driver"
+	depends on ARCH_MESON || COMPILE_TEST
+	depends on OF
+	select GENERIC_PHY
+	select MFD_SYSCON
+	help
+	  Enable this to support the HDMI TX PHY found on Amlogic
+	  GXBB, GXL, GXM and G12A SoCs.
+	  If unsure, say N.
