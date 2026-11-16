@@ -210,6 +210,7 @@
 					 <&clkc CLKID_HTX_PCLK>,
 					 <&clkc CLKID_VPU_INTR>;
 				clock-names = "isfr", "iahb", "venci";
+				phys = <&hdmi_tx_phy>;
 				#address-cells = <1>;
 				#size-cells = <0>;
 				#sound-dai-cells = <0>;
@@ -1682,6 +1683,11 @@
 						compatible = "amlogic,g12a-mipi-dphy-analog";
 						#phy-cells = <0>;
 						status = "disabled";
+					};
+
+					hdmi_tx_phy: hdmi-phy {
+						compatible = "amlogic,meson-g12a-hdmi-tx-phy";
+						#phy-cells = <0>;
 					};
 				};
 			};
